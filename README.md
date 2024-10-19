@@ -27,6 +27,7 @@ This screen displays:
 ● Weather description (clear sky, light rain ... etc.)
 ● All the past hourly for the current date
 ● All past features for 5 days.
+
 ## Weather Alerts Screen:
 This screen will contain a button to add weather alert which should set an alarm with
 the following settings:
