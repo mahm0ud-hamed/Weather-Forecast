@@ -4,6 +4,6 @@ data class Root(
     val cod: String,
     val message: Long,
     val cnt: Long,
-    val list: List<List>,
+    val list: kotlin.collections.List<List>,
     val city: City,
 )
