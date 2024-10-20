@@ -10,12 +10,12 @@ data class Main(
     val tempMin: Double,
     @SerializedName("temp_max")
     val tempMax: Double,
-    val pressure: Long,
+    val pressure: Int,
     @SerializedName("sea_level")
-    val seaLevel: Long,
+    val seaLevel: Int,
     @SerializedName("grnd_level")
-    val grndLevel: Long,
-    val humidity: Long,
+    val grndLevel: Int,
+    val humidity: Int,
     @SerializedName("temp_kf")
     val tempKf: Double,
 )
