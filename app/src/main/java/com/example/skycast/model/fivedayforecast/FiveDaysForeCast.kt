@@ -1,6 +1,6 @@
-package com.example.skycast.model
+package com.example.skycast.model.fivedayforecast
 
-data class Root(
+data class FiveDaysForeCast(
     val cod: String,
     val message: Int,
     val cnt: Int,

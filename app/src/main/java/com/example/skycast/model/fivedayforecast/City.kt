@@ -1,4 +1,6 @@
-package com.example.skycast.model
+package com.example.skycast.model.fivedayforecast
+
+import com.example.skycast.model.commonpojo.Coord
 
 data class City(
     val id: Int,
