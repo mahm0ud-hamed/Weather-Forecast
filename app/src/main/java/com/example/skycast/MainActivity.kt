@@ -34,13 +34,6 @@ class MainActivity : AppCompatActivity() {
                 Log.i("icon" , it.list.get(39).weather.get(0).icon)
 
             }
-
-
-
-
-
-
-
         }
     }
 }
