@@ -1,4 +1,4 @@
-package com.example.skycast.network
+package com.example.skycast.data.network
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

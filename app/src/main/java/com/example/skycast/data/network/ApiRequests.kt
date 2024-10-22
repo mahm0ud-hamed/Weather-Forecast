@@ -1,8 +1,8 @@
-package com.example.skycast.network
+package com.example.skycast.data.network
 
 import com.example.skycast.model.current.CurrentWeather
 import com.example.skycast.model.fivedayforecast.FiveDaysForeCast
-import com.example.skycast.network.RetrofitHelper.API_KEY
+import com.example.skycast.data.network.RetrofitHelper.API_KEY
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,6 +11,8 @@ interface ApiRequests {
     suspend fun getFiveDayForeCast(
         @Query("lat")lat :Double ,
         @Query("lon") lon : Double,
+        @Query("lang") lang:String ,
+        @Query("units")unit:String ,
         @Query("appid") apiKey : String = API_KEY
     ): FiveDaysForeCast
 
@@ -18,6 +20,8 @@ interface ApiRequests {
     suspend fun getCurrentWeatherData(
         @Query("lat")lat :Double ,
         @Query("lon") lon : Double,
+        @Query("lang") lang:String ,
+        @Query("units")unit:String ,
         @Query("appid") apiKey : String = API_KEY
     ) : CurrentWeather
 }
