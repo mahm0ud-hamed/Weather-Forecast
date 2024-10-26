@@ -1,5 +1,6 @@
 package com.example.skycast.data.source.remote
 
+import android.util.Log
 import com.example.skycast.data.network.RetrofitHelper
 import com.example.skycast.model.current.CurrentWeather
 import com.example.skycast.model.fivedayforecast.FiveDaysForeCast
@@ -14,6 +15,7 @@ class RemoteDataSource: IRemoteDataSource {
         /*try to get data over network , if succeeded return data , else return error  */
         return  try {
             val result = apiService.getFiveDayForeCast(lat , lon, lan , unit )
+            Log.i("data" , result.toString())
             val flowResult = flow {emit(result)  }
             Success(flowResult)
         } catch (e :Exception){

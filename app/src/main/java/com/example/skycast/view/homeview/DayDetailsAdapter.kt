@@ -7,7 +7,7 @@ import com.bumptech.glide.Glide
 import com.example.skycast.Util.getTimeAsHumanRedable
 import com.example.skycast.databinding.DayDetailsBinding
 import com.example.skycast.model.fivedayforecast.List
-import com.example.skycast.setWeatherStateImage
+import com.example.skycast.Util.setWeatherStateImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

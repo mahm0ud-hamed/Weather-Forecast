@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="backgroundcoloR">#76D1FF</color>
     <color name="secondBackColor">#036DBB</color>
+    <color name="fillCard">#6679747E</color>
 </resources>

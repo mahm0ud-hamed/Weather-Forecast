@@ -1,6 +1,7 @@
 package com.example.skycast.data.repository
 
 import android.annotation.SuppressLint
+import android.util.Log
 import com.example.skycast.model.current.CurrentWeather
 import com.example.skycast.model.fivedayforecast.FiveDaysForeCast
 import com.example.skycast.data.source.remote.RemoteDataSource

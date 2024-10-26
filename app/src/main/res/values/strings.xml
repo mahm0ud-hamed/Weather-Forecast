@@ -6,6 +6,21 @@
     <string name="cloud">Cloud</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
-    <string name="dayForeCast">24-hour forecast</string>
+    <string name="dayForeCast">One Day Forecast</string>
     <string name="today">Today</string>
+    <string name="fivedays">Five Days Forecast</string>
+    <string name="setting">Setting</string>
+    <string name="celsius">Celsius</string>
+    <string name="wind_speed_unit">Wnid Speed Unit</string>
+    <string name="language">Language</string>
+    <string name="arabic">Arabic</string>
+    <string name="english">English</string>
+    <string name="notification">Notification</string>
+    <string name="kelvin">Kelvin</string>
+    <string name="fahrenheit">Fahrenheit</string>
+    <string name="miles_hour">Miles/Hour</string>
+    <string name="meter_sec">Meter/Sec</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="temperature_unit">Temperature Unit</string>
 </resources>

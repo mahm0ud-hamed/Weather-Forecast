@@ -1,5 +1,6 @@
 package com.example.skycast.view.homeview
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skycast.data.Result
