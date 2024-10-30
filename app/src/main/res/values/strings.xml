@@ -22,5 +22,15 @@
     <string name="meter_sec">Meter/Sec</string>
     <string name="on">On</string>
     <string name="off">Off</string>
+    <string name="speedm_s">m/s</string>
+    <string name="pressure_unit">hpa</string>
+    <string name="mor_time_unit">AM</string>
+    <string name="nig_time_unit">PM</string>
+    <string name="celis_Lable">\u2103</string>
+    <string name="fah_Lable">\u2103</string>
+    <string name="kelvin_Lable">\u212A</string>
+    <string name="search_for_a_place">search for place</string>
+
+
     <string name="temperature_unit">Temperature Unit</string>
 </resources>

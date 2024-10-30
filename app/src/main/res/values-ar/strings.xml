@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SkyCast</string>
+    <string name="pressure">الضغط</string>
+    <string name="humidity">الرطوبه</string>
+    <string name="wind">الرياح</string>
+    <string name="cloud">الغيوم</string>
+    <string name="sunrise">الشروق</string>
+    <string name="sunset">الغروب</string>
+    <string name="dayForeCast">تفاصيل اليوم</string>
+    <string name="today">اليوم</string>
+    <string name="fivedays">تفاصيل خمس ايام</string>
+    <string name="setting">الضبط</string>
+    <string name="celsius">درجه مئوي</string>
+    <string name="wind_speed_unit">وحده سرعه الرياح</string>
+    <string name="language">اللغة</string>
+    <string name="arabic">عربي</string>
+    <string name="english">انجليزي</string>
+    <string name="notification">الاشعارات</string>
+    <string name="kelvin">كلفن</string>
+    <string name="fahrenheit">فهرنهايت</string>
+    <string name="miles_hour">ميل/ساعه</string>
+    <string name="meter_sec">متر/ثانيه</string>
+    <string name="on">فتح</string>
+    <string name="off">غلق</string>
+    <string name="temperature_unit">"وحده الحرارة "</string>
+    <string name="pressure_unit">هكتوباسكال</string>
+    <string name="speedm_s">م/س</string>
+    <string name="mor_time_unit">ص</string>
+    <string name="nig_time_unit">م</string>
+    <string name="celis_Lable">س</string>
+    <string name="fah_Lable">ف</string>
+    <string name="kelvin_Lable">ك</string>
+    <string name="search_for_a_place">البحث عن مكان</string>
+
+
+
+
+
+</resources>

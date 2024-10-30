@@ -1,10 +1,10 @@
-package com.example.skycast.model.current
+package com.example.skycast.model.pojo.current
 
-import com.example.skycast.model.commonpojo.Clouds
-import com.example.skycast.model.commonpojo.Coord
-import com.example.skycast.model.Main
-import com.example.skycast.model.commonpojo.Weather
-import com.example.skycast.model.Wind
+import com.example.skycast.model.pojo.commonpojo.Clouds
+import com.example.skycast.model.pojo.commonpojo.Coord
+import com.example.skycast.model.pojo.Main
+import com.example.skycast.model.pojo.commonpojo.Weather
+import com.example.skycast.model.pojo.Wind
 
 data class CurrentWeather(
     val coord: Coord,

@@ -1,12 +1,12 @@
-package com.example.skycast.view.homeview
+package com.example.skycast.view.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.skycast.data.repository.Repository
 
-class HomeVmFactory (val repository: Repository): ViewModelProvider.Factory {
+class ViewModelFactory (val repository: Repository): ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return HomeViewModel(repository) as T
+        return SharedViewModel(repository) as T
     }
 }

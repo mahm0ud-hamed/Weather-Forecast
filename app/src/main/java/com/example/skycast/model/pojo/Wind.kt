@@ -1,4 +1,4 @@
-package com.example.skycast.model
+package com.example.skycast.model.pojo
 
 data class Wind(
     val speed: Double,

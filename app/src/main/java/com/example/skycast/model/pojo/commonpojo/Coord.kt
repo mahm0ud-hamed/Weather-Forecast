@@ -1,4 +1,4 @@
-package com.example.skycast.model.commonpojo
+package com.example.skycast.model.pojo.commonpojo
 
 data class Coord(
     val lat: Double,

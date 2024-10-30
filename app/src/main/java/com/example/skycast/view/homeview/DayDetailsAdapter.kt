@@ -6,16 +6,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.skycast.Util.getTimeAsHumanRedable
 import com.example.skycast.databinding.DayDetailsBinding
-import com.example.skycast.model.fivedayforecast.List
-import com.example.skycast.Util.setWeatherStateImage
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.skycast.model.pojo.fivedayforecast.List
 
 class DayDetailsAdapter(var states : kotlin.collections.List<List<Any?>> ) : RecyclerView.Adapter<DayDetailsAdapter.ViewHolder>() {
     lateinit var binding: DayDetailsBinding
 
-
+    var newLable :String = ""
         fun updateList(newStates : kotlin.collections.List<List<Any?>>){
             states = newStates
         }
@@ -31,7 +27,7 @@ class DayDetailsAdapter(var states : kotlin.collections.List<List<Any?>> ) : Rec
     override fun onBindViewHolder(holder: DayDetailsAdapter.ViewHolder, position: Int) {
         var currentObj= states.get(position)
         binding.tvTime.text = getTimeAsHumanRedable(currentObj.dt.toLong())
-        binding.tvTemp.text = currentObj.main.temp.toInt().toString()
+        binding.tvTemp.text = "${currentObj.main.temp.toInt() } ${newLable}"
         var imgThumbnail = "https://openweathermap.org/img/wn/"
         Glide.with(binding.imgvState.context).load("${imgThumbnail}${currentObj.weather.get(0).icon}@2x.png").into(binding.imgvState)
 
@@ -39,7 +35,9 @@ class DayDetailsAdapter(var states : kotlin.collections.List<List<Any?>> ) : Rec
     }
 
     override fun getItemCount()= states.size
-
+    fun updateTemperatureLable(newLable : String){
+        this.newLable = newLable
+    }
 }
 
 

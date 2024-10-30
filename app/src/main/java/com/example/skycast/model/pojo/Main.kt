@@ -1,4 +1,4 @@
-package com.example.skycast.model
+package com.example.skycast.model.pojo
 
 import com.google.gson.annotations.SerializedName
 

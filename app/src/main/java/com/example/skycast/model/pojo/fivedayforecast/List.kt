@@ -1,9 +1,9 @@
-package com.example.skycast.model.fivedayforecast
+package com.example.skycast.model.pojo.fivedayforecast
 
-import com.example.skycast.model.Main
-import com.example.skycast.model.commonpojo.Weather
-import com.example.skycast.model.Wind
-import com.example.skycast.model.commonpojo.Clouds
+import com.example.skycast.model.pojo.Main
+import com.example.skycast.model.pojo.commonpojo.Weather
+import com.example.skycast.model.pojo.Wind
+import com.example.skycast.model.pojo.commonpojo.Clouds
 import com.google.gson.annotations.SerializedName
 import kotlin.collections.List
 

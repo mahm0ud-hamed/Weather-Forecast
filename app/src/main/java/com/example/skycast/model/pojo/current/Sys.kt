@@ -1,4 +1,4 @@
-package com.example.skycast.model.current
+package com.example.skycast.model.pojo.current
 
 data class Sys(
     val country: String,

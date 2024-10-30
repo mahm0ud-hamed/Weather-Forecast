@@ -1,8 +1,8 @@
-package com.example.skycast.data.network
+package com.example.skycast.model.network
 
-import com.example.skycast.model.current.CurrentWeather
-import com.example.skycast.model.fivedayforecast.FiveDaysForeCast
-import com.example.skycast.data.network.RetrofitHelper.API_KEY
+import com.example.skycast.model.pojo.current.CurrentWeather
+import com.example.skycast.model.pojo.fivedayforecast.FiveDaysForeCast
+import com.example.skycast.model.network.RetrofitHelper.API_KEY
 import retrofit2.http.GET
 import retrofit2.http.Query
 
