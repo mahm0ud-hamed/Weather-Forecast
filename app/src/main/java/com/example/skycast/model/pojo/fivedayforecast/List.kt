@@ -7,7 +7,7 @@ import com.example.skycast.model.pojo.commonpojo.Clouds
 import com.google.gson.annotations.SerializedName
 import kotlin.collections.List
 
-data class List<T>(
+data class List(
     val dt: Int,
     val main: Main,
     val weather: List<Weather>,

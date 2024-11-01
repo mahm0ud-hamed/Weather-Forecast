@@ -58,7 +58,7 @@
                     app:layout_constraintVertical_bias="0.5" />
 
                 <ImageButton
-                    android:id="@+id/imageButton"
+                    android:id="@+id/btnNotfication"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_marginEnd="5dp"
@@ -70,16 +70,26 @@
                     app:layout_constraintVertical_bias="0.5" />
 
                 <ImageButton
-                    android:id="@+id/imageButton2"
+                    android:id="@+id/btnFavourite"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:layout_marginEnd="5dp"
                     android:background="?android:attr/selectableItemBackground"
                     android:src="@drawable/baseline_favorite_border_24"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/imageButton"
+                    app:layout_constraintEnd_toStartOf="@+id/btnNotfication"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5" />
+
+                <ImageView
+                    android:id="@+id/btn_save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/btn_save"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@+id/btnFavourite"
+                    app:layout_constraintEnd_toStartOf="@id/btnFavourite"
+                    app:layout_constraintTop_toTopOf="@id/btnFavourite" />
 
                 <TextView
                     android:id="@+id/tvDate"

@@ -18,6 +18,9 @@
         android:theme="@style/Theme.SkyCast"
         tools:targetApi="31">
         <activity
+            android:name=".view.favourite.favourite"
+            android:exported="false" />
+        <activity
             android:name=".view.map.map"
             android:exported="false" />
         <activity

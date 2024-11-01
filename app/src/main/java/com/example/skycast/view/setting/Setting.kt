@@ -14,6 +14,7 @@ import com.example.skycast.data.repository.Repository
 import com.example.skycast.data.source.local.LocalDataSource
 import com.example.skycast.data.source.remote.RemoteDataSource
 import com.example.skycast.databinding.ActivitySettingBinding
+import com.example.skycast.model.database.DataBase
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.arabic
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.celsius
@@ -43,16 +44,16 @@ class Setting : AppCompatActivity() {
         binding = ActivitySettingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         /*creating obejcet from view model factory */
-        vmFacroty = ViewModelFactory(
+        vmFacroty =ViewModelFactory(
             Repository(
                 RemoteDataSource(),
                 LocalDataSource(
                     SharedPrefrenceHelper(
                         getSharedPreferences(
                             sharedPrefFile,
-                            Context.MODE_PRIVATE
+                            MODE_PRIVATE
                         )
-                    )
+                    ), DataBase.gteInstance(this).getWeatherDao()
                 )
             )
         )

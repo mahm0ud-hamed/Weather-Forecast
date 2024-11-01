@@ -30,7 +30,17 @@
     <string name="fah_Lable">\u2103</string>
     <string name="kelvin_Lable">\u212A</string>
     <string name="search_for_a_place">search for place</string>
-
+    <string name="latitude">Latitude:</string>
+    <string name="longitude">Longitude:</string>
+    <string name="address">Address:</string>
+    <string name="view">View</string>
+    <string name="set_as_home">Set As Home</string>
+    <string name="cancel">Cancel</string>
+    <string name="don_t_forget_to_check_the_weather">Don\'t forget to check the weather!</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="no_address_found">No Address Found</string>
 
     <string name="temperature_unit">Temperature Unit</string>
+    <string name="nothing_saved_yet">No Saved Items</string>
+    <string name="saved_locations">Saved Locations</string>
 </resources>

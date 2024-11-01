@@ -8,11 +8,11 @@ import com.example.skycast.Util.getTimeAsHumanRedable
 import com.example.skycast.databinding.DayDetailsBinding
 import com.example.skycast.model.pojo.fivedayforecast.List
 
-class DayDetailsAdapter(var states : kotlin.collections.List<List<Any?>> ) : RecyclerView.Adapter<DayDetailsAdapter.ViewHolder>() {
+class DayDetailsAdapter(var states : kotlin.collections.List<List> ) : RecyclerView.Adapter<DayDetailsAdapter.ViewHolder>() {
     lateinit var binding: DayDetailsBinding
 
     var newLable :String = ""
-        fun updateList(newStates : kotlin.collections.List<List<Any?>>){
+        fun updateList(newStates : kotlin.collections.List<List>){
             states = newStates
         }
 

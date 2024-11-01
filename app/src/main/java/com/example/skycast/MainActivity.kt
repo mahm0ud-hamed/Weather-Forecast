@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -28,6 +28,7 @@ import com.example.skycast.databinding.ActivityMainBinding
 import com.example.skycast.data.repository.Repository
 import com.example.skycast.data.source.local.LocalDataSource
 import com.example.skycast.data.source.remote.RemoteDataSource
+import com.example.skycast.model.database.DataBase
 import com.example.skycast.model.pojo.current.CurrentWeather
 import com.example.skycast.model.pojo.fivedayforecast.FiveDaysForeCast
 import com.example.skycast.view.homeview.DayDetailsAdapter
@@ -35,12 +36,14 @@ import com.example.skycast.view.viewmodel.SharedViewModel
 import com.example.skycast.view.viewmodel.ViewModelFactory
 import kotlinx.coroutines.launch
 import com.example.skycast.model.pojo.fivedayforecast.List
+import com.example.skycast.model.pojo.weatherEntity.WeatherEntity
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.celsius
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.fahrenheit
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.kelvin
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.meterPerSecond
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.milePerHour
+import com.example.skycast.view.favourite.favourite
 import com.example.skycast.view.map.map
 import com.example.skycast.view.setting.Setting
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -50,13 +53,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationRequest
 
 import com.google.android.gms.location.Priority
-import java.util.Locale
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val sharedPrefFile = "SettingPref"
-    lateinit var pressureLable :String
     var tempetatureUnit: String = " "
     var windSpeedUnit:String = " "
     var language: String = " "
@@ -64,13 +65,44 @@ class MainActivity : AppCompatActivity() {
     var lonPoint: Double = 0.0
     var windSpeedLable :String = " "
     var tempUnitLable = ""
-    var arabicUnitLable=" "
+    private var isViewOnly: Boolean = false
+    private var isHome: Boolean = false
     private lateinit var fusedClient: FusedLocationProviderClient
     lateinit var vmFactory: ViewModelFactory
+    lateinit var currentWeather :CurrentWeather
+    lateinit var  fiveDaysForeCast :FiveDaysForeCast
     lateinit var viewModel: SharedViewModel
 
     override fun onStart() {
         super.onStart()
+        colloectInfoFromIntent()
+        setViewrPage()
+        /*handeling open of Home form the application launcher */
+        viewModel.getSavedLatLongPointOfLocation()
+        lifecycleScope.launch {
+            viewModel.latLongPoints.collect{
+                when(it){
+                    is Result.Success -> {
+                        latPoint = it.data.first
+                        lonPoint = it.data.second
+                    }
+                    is Result.Error -> {latPoint = 0.0 ; lonPoint = 0.0 }
+                    Result.Loading -> {}
+                }
+            }
+        }
+        viewModel.getCurrentWeatherState(
+            lat = latPoint,
+            lon = lonPoint,
+            lan = language,
+            unit = tempetatureUnit
+        )
+        viewModel.getFiveDaysForeCast(
+            lat = latPoint,
+            lon = lonPoint,
+            lan = language,
+            unit = tempetatureUnit
+        )
         viewModel.loadLanguage()
         viewModel.laodTemperatureUnit()
         viewModel.loadWindSpeedUnit()
@@ -113,7 +145,7 @@ class MainActivity : AppCompatActivity() {
         if (!isLocationEnabled()) {
             enableLocation()
         }
-        startLocationUpdate()
+      // startLocationUpdate()
 
     }
 
@@ -122,6 +154,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         //  enableEdgeToEdge()
         setContentView(binding.root)
+
         /*creating an object from view model*/
         vmFactory = ViewModelFactory(
             Repository(
@@ -132,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                             sharedPrefFile,
                             MODE_PRIVATE
                         )
-                    )
+                    ), DataBase.gteInstance(this).getWeatherDao()
                 )
             )
         )
@@ -153,6 +186,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         lifecycleScope.launch {
             viewModel.fiveDaysForeCast.collect {
                 when (it) {
@@ -167,6 +201,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                         oneDayForeCastAdapter.notifyDataSetChanged()
+                        fiveDaysForeCast = it.data
                     }
                 }
             }
@@ -183,6 +218,7 @@ class MainActivity : AppCompatActivity() {
                     is Result.Success -> {
                         /*set country name */
                         setCurrentDayWeatherDetalis(it.data, binding)
+                        currentWeather = it.data
                     }
                 }
             }
@@ -194,6 +230,31 @@ class MainActivity : AppCompatActivity() {
         binding.btnAddFavLocation.setOnClickListener{
             val intent = Intent(this , map::class.java)
             startActivity(intent)
+        }
+
+        binding.btnFavourite.setOnClickListener {
+            val intent = Intent(this , favourite::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnSave.setOnClickListener{
+            val weatherEntity= WeatherEntity(
+                currentWeather.name ,
+                currentWeather.coord,
+                currentWeather.weather ,
+                currentWeather.base ,
+                currentWeather.main ,
+                currentWeather.visibility,
+                currentWeather.wind ,
+                currentWeather.clouds ,
+                currentWeather.dt ,
+                currentWeather.sys ,
+                currentWeather.timezone ,
+                currentWeather.id,
+                currentWeather.cod,
+                fiveDaysForeCast.list
+            )
+            viewModel.saveLocation(weatherEntity)
         }
     }
 
@@ -260,6 +321,7 @@ class MainActivity : AppCompatActivity() {
         binding.tvSunRise.text = getString(R.string.sunrise)
         binding.tvSunSet.text = getString(R.string.sunset)
         binding.tvHumidity.text= getString(R.string.humidity)
+
         setCityName(info, binding.tvCityName)
         setDate(info, binding.tvDate)
         setWeatherStateImage(binding.imgvWeatherState, info.weather.get(0).icon)
@@ -293,7 +355,7 @@ class MainActivity : AppCompatActivity() {
         binding.tvFdFourthTemp1.text = dayFour.first.toString()
         binding.tvFdFourthTemp2.text = " /${dayFour.second} ${tempUnitLable}"
         binding.tvFdFifthTemp1.text = dayFive.first.toString()
-        binding.tvFdFifthTemp2.text = " /${dayFive.second} ${tempUnitLable}"
+        binding.tvFdFifthTemp2.text = " /${dayFive.second} $tempUnitLable"
 
 
 
@@ -317,11 +379,30 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun setViewrPage(){
+        if(isViewOnly){
+            binding.btnAddFavLocation.visibility = View.GONE
+            binding.btnFavourite.visibility = View.GONE
+            binding.btnNotfication.visibility= View.GONE
+            binding.btnSave.visibility= View.VISIBLE
+
+        }
+    }
+
+    private fun colloectInfoFromIntent(){
+        latPoint = intent.getDoubleExtra("LATITUDE" , 0.0)
+        Log.i("intent" , "in main actvity"+latPoint.toString() )
+        lonPoint = intent.getDoubleExtra("LONGTIUDE" , 0.0)
+        isViewOnly = intent.getBooleanExtra("ToView" , false)
+        isHome= intent.getBooleanExtra("ToHome" , false)
+
+    }
+
 }
 
 
 /*method too check the minimum and mximum temperature per day , return Pair of int with m,min and max value */
-fun getMaxAndMinTemperaturePerDay(dayInfo: kotlin.collections.List<List<Any?>>): Pair<Int, Int> {
+fun getMaxAndMinTemperaturePerDay(dayInfo: kotlin.collections.List<List>): Pair<Int, Int> {
     val maxTemps: MutableList<Int> = mutableListOf()
     val minTemps: MutableList<Int> = mutableListOf()
     for (i in 0 until dayInfo.size) {
