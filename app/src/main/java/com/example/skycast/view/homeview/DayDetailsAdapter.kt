@@ -18,8 +18,8 @@ class DayDetailsAdapter(var states : kotlin.collections.List<List> ) : RecyclerV
 
     class ViewHolder(val binding: DayDetailsBinding) : RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayDetailsAdapter.ViewHolder {
-       val inflater = LayoutInflater.from(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        LayoutInflater.from(parent.context)
         binding = DayDetailsBinding.inflate(LayoutInflater.from(parent.context), parent , false)
         return ViewHolder(binding)
     }

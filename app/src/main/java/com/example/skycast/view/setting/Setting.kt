@@ -113,6 +113,8 @@ class Setting : AppCompatActivity() {
                 }
             }
         }
+
+        backButtonAction()
     }
 
 
@@ -175,5 +177,10 @@ class Setting : AppCompatActivity() {
         this.recreate()
     }
 
+    private fun backButtonAction(){
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+    }
 }
 
