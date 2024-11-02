@@ -19,7 +19,7 @@
     <string name="kelvin">Kelvin</string>
     <string name="fahrenheit">Fahrenheit</string>
     <string name="miles_hour">Miles/Hour</string>
-    <string name="meter_sec">Meter/Sec</string>
+    <string name="meter_sec">m/sec</string>
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="speedm_s">m/s</string>
@@ -43,4 +43,8 @@
     <string name="temperature_unit">Temperature Unit</string>
     <string name="nothing_saved_yet">No Saved Items</string>
     <string name="saved_locations">Saved Locations</string>
+    <string name="saved_alrms">Saved Alarms</string>
+    <string name="location">Location</string>
+    <string name="gps">GPS</string>
+    <string name="map">Map</string>
 </resources>

@@ -35,6 +35,7 @@ class favourite : AppCompatActivity() {
         favouriteAdapter = FavouriteAdapter(arrayListOf()){
             val intent = Intent(this , MainActivity::class.java)
             intent.putExtra("cityName" , it.cityName)
+            intent.putExtra("fromFav" , true )
             startActivity(intent)
         }
         binding.rvFavs.apply {
@@ -55,7 +56,8 @@ class favourite : AppCompatActivity() {
                             sharedPrefFile,
                             MODE_PRIVATE
                         )
-                    ), DataBase.gteInstance(this).getWeatherDao()
+                    ), DataBase.gteInstance(this).getWeatherDao(),
+                    DataBase.gteInstance(this).getAlarmDao()
                 )
             )
         )

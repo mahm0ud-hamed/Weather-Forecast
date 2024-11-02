@@ -400,7 +400,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/card_notification"
+            android:id="@+id/card_Location"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -437,7 +437,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="8dp"
-                        android:text="@string/notification"
+                        android:text="@string/location"
                         android:textColor="@color/white"
                         android:textSize="22sp" />
                 </LinearLayout>
@@ -452,7 +452,7 @@
 
                 <!-- RadioGroup for Kelvin, Celsius, Fahrenheit (Vertical Alignment) -->
                 <RadioGroup
-                    android:id="@+id/radioGroup_notification"
+                    android:id="@+id/radioGroup_Location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -464,14 +464,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
-                        android:text="@string/on"
+                        android:text="@string/gps"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/radio_kelvin" />
 
                     <RadioButton
-                        android:id="@+id/radio_on_notification"
+                        android:id="@+id/radio_Gps"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
@@ -488,14 +488,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="24dp"
-                        android:text="@string/off"
+                        android:text="@string/map"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="@+id/radio_celsius" />
 
                     <RadioButton
-                        android:id="@+id/radio_off_notification"
+                        android:id="@+id/radio_Map"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"

@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 const val dayOneStart = 0
 const val dayOneEnd = 7
@@ -56,4 +57,10 @@ fun convertDateToHmanRedable(unixTime: Long): Pair<String, String> {
 fun setWeatherStateImage(imgv: ImageView, info: String) {
     var imgThumbnail = "https://openweathermap.org/img/wn/"
     Glide.with(imgv.context).load("${imgThumbnail}${info}@2x.png").into(imgv)
+}
+
+fun formatMillisToDateTime(millis: Long): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    dateFormat.timeZone = TimeZone.getDefault() // Set to your desired time zone
+    return dateFormat.format(millis)
 }

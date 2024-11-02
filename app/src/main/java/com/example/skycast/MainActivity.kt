@@ -40,9 +40,12 @@ import com.example.skycast.model.pojo.weatherEntity.WeatherEntity
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.celsius
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.fahrenheit
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.gps
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.kelvin
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.maps
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.meterPerSecond
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.milePerHour
+import com.example.skycast.view.alarm.Alarm
 import com.example.skycast.view.favourite.favourite
 import com.example.skycast.view.map.map
 import com.example.skycast.view.setting.Setting
@@ -65,6 +68,8 @@ class MainActivity : AppCompatActivity() {
     var lonPoint: Double = 0.0
     var windSpeedLable :String = " "
     var tempUnitLable = ""
+    var locationDetection = gps
+    var isFromFav:Boolean = false
     private var isViewOnly: Boolean = false
     private var isHome: Boolean = false
     private lateinit var fusedClient: FusedLocationProviderClient
@@ -72,68 +77,22 @@ class MainActivity : AppCompatActivity() {
     lateinit var currentWeather :CurrentWeather
     lateinit var  fiveDaysForeCast :FiveDaysForeCast
     lateinit var viewModel: SharedViewModel
+    lateinit var oneDayForeCastAdapter : DayDetailsAdapter
+    lateinit var cityName : String
+
 
     override fun onStart() {
         super.onStart()
+        checkLanguage()
         colloectInfoFromIntent()
-        setViewrPage()
+        loadLocationDetection()
         /*handeling open of Home form the application launcher */
         viewModel.getSavedLatLongPointOfLocation()
-        lifecycleScope.launch {
-            viewModel.latLongPoints.collect{
-                when(it){
-                    is Result.Success -> {
-                        latPoint = it.data.first
-                        lonPoint = it.data.second
-                    }
-                    is Result.Error -> {latPoint = 0.0 ; lonPoint = 0.0 }
-                    Result.Loading -> {}
-                }
-            }
-        }
-        viewModel.getCurrentWeatherState(
-            lat = latPoint,
-            lon = lonPoint,
-            lan = language,
-            unit = tempetatureUnit
-        )
-        viewModel.getFiveDaysForeCast(
-            lat = latPoint,
-            lon = lonPoint,
-            lan = language,
-            unit = tempetatureUnit
-        )
-        viewModel.loadLanguage()
-        viewModel.laodTemperatureUnit()
-        viewModel.loadWindSpeedUnit()
-        language = when (val result= viewModel.language.value) {
-            is Result.Error -> "en"
-            Result.Loading -> "en"
-            is Result.Success -> result.data
-        }
-        LocaleUtils.setLocale(this,language)
-        tempetatureUnit = when (val result = viewModel.tempeatureUnit.value) {
-            is Result.Error -> celsius
-            Result.Loading -> celsius
-            is Result.Success -> result.data
-        }
-        tempUnitLable = when(tempetatureUnit){
-                celsius ->getString(R.string.celis_Lable)
-                fahrenheit->getString(R.string.fah_Lable)
-                kelvin-> getString(R.string.kelvin_Lable)
-                else -> {""}
-            }
-        windSpeedUnit=when (val result = viewModel.windSpeedUnit.value){
-            is Result.Success-> result.data
-            is Result.Error -> meterPerSecond
-            Result.Loading -> milePerHour
-        }
-
-        windSpeedLable = when(windSpeedUnit){
-            milePerHour-> getString(R.string.miles_hour)
-            meterPerSecond->getString(R.string.meter_sec)
-            else -> {"m/s"}
-        }
+        setHome()
+        setViewrPage()
+        getTodayWeatherState()
+        getFiveDaysWeatherSate()
+        setUnitsAndLables()
         if (!isLocationPermissionEnabled()) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(
@@ -152,9 +111,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        //  enableEdgeToEdge()
         setContentView(binding.root)
-
         /*creating an object from view model*/
         vmFactory = ViewModelFactory(
             Repository(
@@ -165,7 +122,8 @@ class MainActivity : AppCompatActivity() {
                             sharedPrefFile,
                             MODE_PRIVATE
                         )
-                    ), DataBase.gteInstance(this).getWeatherDao()
+                    ), DataBase.gteInstance(this).getWeatherDao(),
+                        DataBase.gteInstance(this).getAlarmDao()
                 )
             )
         )
@@ -176,88 +134,55 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        LocaleUtils.setLocale(this,language)
-        val oneDayForeCastAdapter = DayDetailsAdapter(arrayListOf())
-        oneDayForeCastAdapter.updateTemperatureLable(tempUnitLable)
-        binding.rvWholeDayStates.apply {
-            adapter = oneDayForeCastAdapter
-            layoutManager = LinearLayoutManager(this@MainActivity).apply {
-                orientation = RecyclerView.HORIZONTAL
-            }
-        }
-
-
-        lifecycleScope.launch {
-            viewModel.fiveDaysForeCast.collect {
-                when (it) {
-                    is Result.Error -> Log.i("data", "fail")
-                    Result.Loading -> Log.i("data", "Loading")
-                    is Result.Success -> {
-                        setFiveDaysForecastData(it.data, binding)
-                        oneDayForeCastAdapter.updateList(
-                            it.data.list.subList(
-                                dayOneStart,
-                                dayOneEnd
-                            )
-                        )
-                        oneDayForeCastAdapter.notifyDataSetChanged()
-                        fiveDaysForeCast = it.data
-                    }
-                }
-            }
-        }
-
-
-
-
-        lifecycleScope.launch {
-            viewModel.currentWeatherState.collect {
-                when (it) {
-                    is Result.Error -> it.exception.toString()
-                    is Result.Loading -> Log.i("data", "loading")
-                    is Result.Success -> {
-                        /*set country name */
-                        setCurrentDayWeatherDetalis(it.data, binding)
-                        currentWeather = it.data
-                    }
-                }
-            }
-        }
-        binding.btnSetting.setOnClickListener {
-            val intent = Intent(this, Setting::class.java)
-            startActivity(intent)
-        }
-        binding.btnAddFavLocation.setOnClickListener{
-            val intent = Intent(this , map::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnFavourite.setOnClickListener {
-            val intent = Intent(this , favourite::class.java)
-            startActivity(intent)
-        }
-
-        binding.btnSave.setOnClickListener{
-            val weatherEntity= WeatherEntity(
-                currentWeather.name ,
-                currentWeather.coord,
-                currentWeather.weather ,
-                currentWeather.base ,
-                currentWeather.main ,
-                currentWeather.visibility,
-                currentWeather.wind ,
-                currentWeather.clouds ,
-                currentWeather.dt ,
-                currentWeather.sys ,
-                currentWeather.timezone ,
-                currentWeather.id,
-                currentWeather.cod,
-                fiveDaysForeCast.list
-            )
-            viewModel.saveLocation(weatherEntity)
-        }
+        setAdapter()
+        setFiveDaysStetonUI()
+       setCurrentStateOnUI()
+        buttonsListners()
     }
 
+
+    private  fun loadLocationFromDataBase(){
+        viewModel.getSavedLocationByCityName(cityName)
+        lifecycleScope.launch {
+            viewModel.savedCity.collect{
+                when(it){
+                    is Result.Error ->{}
+                    Result.Loading -> {}
+                    is Result.Success -> {
+                        val currentWeather = CurrentWeather(it.data.coord ,
+                            it.data.weather,
+                            it.data.base,
+                            it.data.main ,
+                            it.data.visibility,
+                            it.data.wind,
+                            it.data.clouds ,
+                            it.data.dt ,
+                            it.data.sys ,
+                            it.data.timezone,
+                            it.data.id ,
+                            it.data.cityName,
+                            it.data.cod
+                        )
+                        setCurrentDayWeatherDetalis(currentWeather)
+                        setFiveDaysForecastData(it.data.list)
+                        Log.i("from fav ", it.data.cityName)
+                    }
+                }
+            }
+        }
+
+    }
+    private fun loadLocationDetection(){
+        viewModel.getLocationDetection()
+        lifecycleScope.launch {
+            viewModel.locationDetection.collect{
+                locationDetection = it
+            }
+        }
+
+        Log.i("location" , locationDetection)
+    }
+    /*check if location is enabled or not */
     private fun isLocationEnabled(): Boolean {
         val locationManager: LocationManager =
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -266,11 +191,13 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    /*enable location is enabled */
     private fun enableLocation() {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
         startActivity(intent)
     }
 
+    /*check for location permission*/
     private fun isLocationPermissionEnabled(): Boolean {
         return checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
                 checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -280,7 +207,6 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun startLocationUpdate() {
         fusedClient = LocationServices.getFusedLocationProviderClient(this)
-
         fusedClient.requestLocationUpdates(
             LocationRequest.Builder(5000)
                 .apply { Priority.PRIORITY_HIGH_ACCURACY }.build(),
@@ -290,19 +216,9 @@ class MainActivity : AppCompatActivity() {
                     lonPoint = location.lastLocation?.latitude!!.toDouble()
                     latPoint = location.lastLocation?.longitude!!.toDouble()
                     /*request five days forecast*/
-                    viewModel.getFiveDaysForeCast(
-                        lat = latPoint,
-                        lon = lonPoint,
-                        lan = language,
-                        unit = tempetatureUnit
-                    )
+                    getFiveDaysWeatherSate()
                     /*request the current weather data */
-                    viewModel.getCurrentWeatherState(
-                        lat = latPoint,
-                        lon = lonPoint,
-                        lan = language,
-                        unit = tempetatureUnit
-                    )
+                    getTodayWeatherState()
                 }
             }, Looper.getMainLooper()
         )
@@ -313,7 +229,7 @@ class MainActivity : AppCompatActivity() {
         tvCurrentDegree.text = "${info.main.temp.toInt()} ${tempUnitLable}"
     }
     /*method that will load info of current weather fore cast on home screen */
-    fun setCurrentDayWeatherDetalis(info: CurrentWeather, binding: ActivityMainBinding) {
+    fun setCurrentDayWeatherDetalis(info: CurrentWeather) {
         binding.tvOneDayForecast.text = getString(R.string.dayForeCast)
         binding.tvPressure.text = getString(R.string.pressure)
         binding.tvWind.text = getString(R.string.wind)
@@ -337,13 +253,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     /*method that will load all five days fore cast info in home screen */
-    fun setFiveDaysForecastData(info: FiveDaysForeCast, binding: ActivityMainBinding) {
+    fun setFiveDaysForecastData(info: kotlin.collections.List<List>) {
         /*setting the max and minimum temperature in the five day forecast */
-        val dayone = getMaxAndMinTemperaturePerDay(info.list.subList(0, 7))
-        val dayTwo = getMaxAndMinTemperaturePerDay(info.list.subList(8, 15))
-        val daythree = getMaxAndMinTemperaturePerDay(info.list.subList(16, 23))
-        val dayFour = getMaxAndMinTemperaturePerDay(info.list.subList(24, 31))
-        val dayFive = getMaxAndMinTemperaturePerDay(info.list.subList(32, 39))
+        val dayone = getMaxAndMinTemperaturePerDay(info.subList(0, 7))
+        val dayTwo = getMaxAndMinTemperaturePerDay(info.subList(8, 15))
+        val daythree = getMaxAndMinTemperaturePerDay(info.subList(16, 23))
+        val dayFour = getMaxAndMinTemperaturePerDay(info.subList(24, 31))
+        val dayFive = getMaxAndMinTemperaturePerDay(info.subList(32, 39))
         binding.tvFdForecast.text=getString(R.string.dayForeCast)
         binding.tvfdToDya.text=getString(R.string.today)
         binding.tvFdTodayTemp1.text = dayone.first.toString()
@@ -359,28 +275,30 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        binding.tvFdSecondDay.text = convertDateToHmanRedable(info.list.get(8).dt.toLong()).second
-        binding.tvFdThirdDay.text = convertDateToHmanRedable(info.list.get(16).dt.toLong()).second
-        binding.tvFdFourthDay.text = convertDateToHmanRedable(info.list.get(24).dt.toLong()).second
-        binding.tvFdFifthDay.text = convertDateToHmanRedable(info.list.get(32).dt.toLong()).second
+        binding.tvFdSecondDay.text = convertDateToHmanRedable(info[8].dt.toLong()).second
+        binding.tvFdThirdDay.text = convertDateToHmanRedable(info[16].dt.toLong()).second
+        binding.tvFdFourthDay.text = convertDateToHmanRedable(info[24].dt.toLong()).second
+        binding.tvFdFifthDay.text = convertDateToHmanRedable(info[32].dt.toLong()).second
 
-        setWeatherStateImage(binding.imgvFdTody, info.list.get(0).weather.get(0).icon)
-        setWeatherStateImage(binding.imgvFdSecondDay, info.list.get(8).weather.get(0).icon)
-        setWeatherStateImage(binding.imgvFdThirdDay, info.list.get(16).weather.get(0).icon)
-        setWeatherStateImage(binding.imgvFdFourthDay, info.list.get(24).weather.get(0).icon)
-        setWeatherStateImage(binding.imgvFdFifthDay, info.list.get(32).weather.get(0).icon)
+        setWeatherStateImage(binding.imgvFdTody, info[0].weather[0].icon)
+        setWeatherStateImage(binding.imgvFdSecondDay, info[8].weather[0].icon)
+        setWeatherStateImage(binding.imgvFdThirdDay, info[16].weather.get(0).icon)
+        setWeatherStateImage(binding.imgvFdFourthDay, info[24].weather.get(0).icon)
+        setWeatherStateImage(binding.imgvFdFifthDay, info[32].weather.get(0).icon)
 
 
-        setWeatherDescription(info.list.get(0).weather[0].main, binding.tvFdTodaySkyState)
-        setWeatherDescription(info.list.get(8).weather[0].main, binding.tvFdSecondSkyState)
-        setWeatherDescription(info.list.get(16).weather[0].main, binding.tvFdThirdSkyState)
-        setWeatherDescription(info.list.get(23).weather[0].main, binding.tvFdFouthSkyState)
-        setWeatherDescription(info.list.get(32).weather[0].main, binding.tvFdFifthSkyState)
+        setWeatherDescription(info[0].weather[0].main, binding.tvFdTodaySkyState)
+        setWeatherDescription(info[8].weather[0].main, binding.tvFdSecondSkyState)
+        setWeatherDescription(info[16].weather[0].main, binding.tvFdThirdSkyState)
+        setWeatherDescription(info[23].weather[0].main, binding.tvFdFouthSkyState)
+        setWeatherDescription(info[32].weather[0].main, binding.tvFdFifthSkyState)
 
     }
 
     private fun setViewrPage(){
+
         if(isViewOnly){
+            /*ste visibility of some view component gone */
             binding.btnAddFavLocation.visibility = View.GONE
             binding.btnFavourite.visibility = View.GONE
             binding.btnNotfication.visibility= View.GONE
@@ -389,15 +307,197 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setHome() {
+
+        if (!isFromFav && (locationDetection == maps)) {
+            loadLatituedAndLongtiude()
+            Log.i("hello" , "hello from maps")
+
+        }
+        else if(!isFromFav && (locationDetection == gps)){
+            startLocationUpdate()
+            Log.i("hello" , "hello from gps")
+
+        }
+        else if(isFromFav){
+            loadLocationFromDataBase()
+            Log.i("hello" , "hello")
+        }
+    }
+
+    private fun loadLatituedAndLongtiude(){
+        lifecycleScope.launch {
+            viewModel.latLongPoints.collect {
+                when (it) {
+                    is Result.Success -> {
+                        latPoint = it.data.first
+                        lonPoint = it.data.second
+                    }
+
+                    is Result.Error -> {
+                        latPoint = 0.0; lonPoint = 0.0
+                    }
+
+                    Result.Loading -> {}
+                }
+            }
+        }
+    }
     private fun colloectInfoFromIntent(){
+        /*collect lat and long points that passed with intent */
         latPoint = intent.getDoubleExtra("LATITUDE" , 0.0)
-        Log.i("intent" , "in main actvity"+latPoint.toString() )
         lonPoint = intent.getDoubleExtra("LONGTIUDE" , 0.0)
+        /*chehck if come to just view the passed location*/
         isViewOnly = intent.getBooleanExtra("ToView" , false)
+        /*check if come to seet the passed location as the home location */
         isHome= intent.getBooleanExtra("ToHome" , false)
+        isFromFav = intent.getBooleanExtra("fromFav", false)
+        cityName = intent.getStringExtra("cityName").toString()
+        Log.i("cityName" , cityName)
 
     }
 
+    private fun checkLanguage () {
+        viewModel.loadLanguage()
+        language = when (val result= viewModel.language.value) {
+            is Result.Error -> "en"
+            Result.Loading -> "en"
+            is Result.Success -> result.data
+        }
+        LocaleUtils.setLocale(this,language)
+    }
+    private fun getTodayWeatherState() {
+        viewModel.getCurrentWeatherState(
+            lat = latPoint,
+            lon = lonPoint,
+            lan = language,
+            unit = tempetatureUnit
+        )
+    }
+
+    private fun getFiveDaysWeatherSate(){
+        viewModel.getFiveDaysForeCast(
+            lat = latPoint,
+            lon = lonPoint,
+            lan = language,
+            unit = tempetatureUnit
+        )
+    }
+
+    private fun setUnitsAndLables(){
+
+        viewModel.laodTemperatureUnit()
+        viewModel.loadWindSpeedUnit()
+        tempetatureUnit = when (val result = viewModel.tempeatureUnit.value) {
+            is Result.Error -> celsius
+            Result.Loading -> celsius
+            is Result.Success -> result.data
+        }
+        tempUnitLable = when(tempetatureUnit){
+            celsius ->getString(R.string.celis_Lable)
+            fahrenheit->getString(R.string.fah_Lable)
+            kelvin-> getString(R.string.kelvin_Lable)
+            else -> {""}
+        }
+        windSpeedUnit=when (val result = viewModel.windSpeedUnit.value){
+            is Result.Success-> result.data
+            is Result.Error -> meterPerSecond
+            Result.Loading -> milePerHour
+        }
+
+        windSpeedLable = when(windSpeedUnit){
+            milePerHour-> getString(R.string.miles_hour)
+            meterPerSecond->getString(R.string.meter_sec)
+            else -> {"m/s"}
+        }
+    }
+    private fun setCurrentStateOnUI(){
+        lifecycleScope.launch {
+            viewModel.currentWeatherState.collect {
+                when (it) {
+                    is Result.Error -> it.exception.toString()
+                    is Result.Loading -> Log.i("data", "loading")
+                    is Result.Success -> {
+                        /*set country name */
+                        setCurrentDayWeatherDetalis(it.data)
+                        currentWeather = it.data
+                    }
+                }
+            }
+        }
+    }
+    private fun setFiveDaysStetonUI(){
+        lifecycleScope.launch {
+            viewModel.fiveDaysForeCast.collect {
+                when (it) {
+                    is Result.Error -> Log.i("data", "fail")
+                    Result.Loading -> Log.i("data", "Loading")
+                    is Result.Success -> {
+                        setFiveDaysForecastData(it.data.list)
+                        oneDayForeCastAdapter.updateList(
+                            it.data.list.subList(
+                                dayOneStart,
+                                dayOneEnd
+                            )
+                        )
+                        oneDayForeCastAdapter.notifyDataSetChanged()
+                        fiveDaysForeCast = it.data
+                    }
+                }
+            }
+        }
+
+    }
+
+    private fun setAdapter(){
+        LocaleUtils.setLocale(this,language)
+        oneDayForeCastAdapter = DayDetailsAdapter(arrayListOf())
+        oneDayForeCastAdapter.updateTemperatureLable(tempUnitLable)
+        binding.rvWholeDayStates.apply {
+            adapter = oneDayForeCastAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity).apply {
+                orientation = RecyclerView.HORIZONTAL
+            }
+        }
+    }
+
+    private fun buttonsListners(){
+        binding.btnSetting.setOnClickListener {
+            val intent = Intent(this, Setting::class.java)
+            startActivity(intent)
+        }
+        binding.btnAddFavLocation.setOnClickListener{
+            val intent = Intent(this , map::class.java)
+            startActivity(intent)
+        }
+
+        binding.btnFavourite.setOnClickListener {
+            val intent = Intent(this , favourite::class.java)
+            startActivity(intent)
+        }
+        binding.btnNotfication.setOnClickListener {
+            startActivity(Intent(this , Alarm::class.java))
+        }
+        binding.btnSave.setOnClickListener{
+            val weatherEntity= WeatherEntity(
+                currentWeather.name ,
+                currentWeather.coord,
+                currentWeather.weather ,
+                currentWeather.base ,
+                currentWeather.main ,
+                currentWeather.visibility,
+                currentWeather.wind ,
+                currentWeather.clouds ,
+                currentWeather.dt ,
+                currentWeather.sys ,
+                currentWeather.timezone ,
+                currentWeather.id,
+                currentWeather.cod,
+                fiveDaysForeCast.list
+            )
+            viewModel.saveLocation(weatherEntity)
+        }
+    }
 }
 
 
@@ -428,4 +528,5 @@ fun setDate(info: CurrentWeather, tvDate: TextView) {
 fun setWeatherDescription(info: String, tvDescription: TextView) {
     tvDescription.text = info
 }
+
 

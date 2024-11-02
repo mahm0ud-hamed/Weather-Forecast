@@ -1,6 +1,5 @@
 package com.example.skycast.view.setting
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -30,7 +29,9 @@ import com.example.skycast.view.viewmodel.SharedViewModel
 import com.example.skycast.view.viewmodel.ViewModelFactory
 import kotlinx.coroutines.launch
 import java.util.Locale
-
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.gps
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.locationKey
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.maps
 
 class Setting : AppCompatActivity() {
     lateinit var vmFacroty: ViewModelFactory
@@ -53,23 +54,35 @@ class Setting : AppCompatActivity() {
                             sharedPrefFile,
                             MODE_PRIVATE
                         )
-                    ), DataBase.gteInstance(this).getWeatherDao()
+                    ), DataBase.gteInstance(this).getWeatherDao(),
+                    DataBase.gteInstance(this).getAlarmDao()
                 )
             )
         )
         /*creating an object from setting view model*/
         setingViewModel = ViewModelProvider(this, vmFacroty).get(SharedViewModel::class.java)
+
         setingViewModel.laodTemperatureUnit()
         setingViewModel.loadLanguage()
         setingViewModel.loadWindSpeedUnit()
+        setingViewModel.getLocationDetection()
     }
 
 
     override fun onResume() {
         super.onResume()
         selectTemperatureUnit(binding)
-        selectWindSpeedUnit(binding)
-        selectLanguage(binding)
+        selectWindSpeedUnit()
+        selectLanguage()
+        slectLocationDetection()
+        lifecycleScope.launch {
+            setingViewModel.locationDetection.collect{
+                when(it){
+                    gps -> binding.radioGroupLocation.check(binding.radioGps.id)
+                    maps -> binding.radioGroupLocation.check(binding.radioMap.id)
+                }
+            }
+        }
         lifecycleScope.launch {
             setingViewModel.tempeatureUnit.collect {
                 when(it){
@@ -131,7 +144,7 @@ class Setting : AppCompatActivity() {
 
     }
 
-    private fun selectLanguage(binding: ActivitySettingBinding) {
+    private fun selectLanguage() {
         binding.radioGroupLanguage.setOnCheckedChangeListener { _, checkedId ->
             val language = when (checkedId) {
                 binding.radioEnglish.id -> english
@@ -145,7 +158,18 @@ class Setting : AppCompatActivity() {
         }
     }
 
-    private fun selectWindSpeedUnit(binding: ActivitySettingBinding) {
+    private fun slectLocationDetection(){
+        binding.radioGroupLocation.setOnCheckedChangeListener { _ , checkedId->
+            val location = when(checkedId){
+                binding.radioGps.id -> gps
+                binding.radioMap.id-> maps
+                else -> {}
+            }
+            setingViewModel.saveSelection(locationKey , location.toString())
+        }
+    }
+
+    private fun selectWindSpeedUnit() {
         binding.radioGroupWind.setOnCheckedChangeListener { _, checkedId ->
             val windSpeed = when (checkedId) {
                 binding.radioMilesPerHour.id -> milePerHour

@@ -10,4 +10,5 @@ interface ISharedPrefrenceHelper {
     suspend fun loadLanguage() :String
     suspend fun loadWindSpeedUnit():String
     suspend fun getLatAndLingOfLocation(): Pair<Double , Double>
+    suspend fun lodaLocationDetction(): String
 }

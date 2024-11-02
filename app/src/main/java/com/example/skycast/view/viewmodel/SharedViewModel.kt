@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skycast.data.Result
 import com.example.skycast.data.repository.IRepository
+import com.example.skycast.model.pojo.alarmentity.WeatherAlarm
 import com.example.skycast.model.pojo.commonpojo.Weather
 import com.example.skycast.model.pojo.current.CurrentWeather
 import com.example.skycast.model.pojo.fivedayforecast.City
@@ -47,6 +48,44 @@ class SharedViewModel(val repository: IRepository):ViewModel(){
     private val _savedCity = MutableStateFlow<Result<WeatherEntity>>(Result.Loading)
     val savedCity :MutableStateFlow<Result<WeatherEntity>> = _savedCity
 
+    private val _alarms = MutableStateFlow<Result<List<WeatherAlarm>>>(Result.Loading)
+    val alarms : StateFlow<Result<List<WeatherAlarm>>> =_alarms
+
+    private val _LocationDetection = MutableStateFlow<String>("gps")
+    val locationDetection :StateFlow<String> = _LocationDetection
+
+    fun getLocationDetection(){
+        viewModelScope.launch {
+            val location =  repository.loadLocationDetection()
+            _LocationDetection.value = location
+        }
+
+    }
+
+    fun getAllAlarms() {
+        viewModelScope.launch {
+            repository.getAllAlarms().collect{
+                _alarms.value= it
+            }
+        }
+
+    }
+
+    fun deleteAlarm(id :Long){
+        viewModelScope.launch {
+            repository.deleteAlams(id)
+        }
+    }
+
+    fun saveAlarm(triggerAtMillis: Long, weatherInfo: String){
+        val alarm = WeatherAlarm(triggerAtMillis = triggerAtMillis, weatherInfo = weatherInfo)
+        viewModelScope.launch {
+            repository.savaAlarm(alarm)
+            getAllAlarms()
+        }
+    }
+
+
     fun getAllSavedLocations(){
         viewModelScope.launch {
             repository.getAllSavedLocations().collect{
@@ -69,9 +108,10 @@ class SharedViewModel(val repository: IRepository):ViewModel(){
     fun getSavedLocationByCityName(cityName : String){
         viewModelScope.launch {
             repository.getSavedLocationByCityName(cityName).collect{
-
+                _savedCity.value = it
             }
         }
+        Log.i("vmCity", cityName)
     }
     fun getSavedLatLongPointOfLocation(){
         viewModelScope.launch {

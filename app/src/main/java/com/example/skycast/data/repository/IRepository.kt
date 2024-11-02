@@ -4,6 +4,7 @@ import com.example.skycast.model.pojo.current.CurrentWeather
 import com.example.skycast.model.pojo.fivedayforecast.FiveDaysForeCast
 import kotlinx.coroutines.flow.Flow
 import com.example.skycast.data.Result
+import com.example.skycast.model.pojo.alarmentity.WeatherAlarm
 import com.example.skycast.model.pojo.weatherEntity.WeatherEntity
 
 interface IRepository {
@@ -27,6 +28,7 @@ interface IRepository {
     suspend fun loadTemperatureUnit(): Flow<Result<String>>
     suspend fun loadLanguage(): Flow<Result<String>>
     suspend fun loadWindSpeedUnit(): Flow<Result<String>>
+    suspend fun loadLocationDetection():String
 
     suspend fun loadLatAndLongOfLocation():Flow<Result<Pair<Double,Double>>>
 
@@ -36,5 +38,9 @@ interface IRepository {
     suspend fun getSavedLocationByCityName(cityName : String):Flow<Result<WeatherEntity>>
     suspend fun saveLocation(weatherEntity: WeatherEntity)
     suspend fun deleteLocation(weatherEntity: WeatherEntity)
+
+    suspend fun savaAlarm(alarm: WeatherAlarm)
+    suspend fun getAllAlarms() : Flow<Result<List<WeatherAlarm>>>
+    suspend fun deleteAlams(id : Long)
 
 }

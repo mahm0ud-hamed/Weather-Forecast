@@ -3,7 +3,6 @@ package com.example.skycast.view.map
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
 import com.example.skycast.databinding.ActivityMapBinding
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -25,13 +24,14 @@ import com.example.skycast.data.source.remote.RemoteDataSource
 import com.example.skycast.databinding.BootmSheetBinding
 import com.example.skycast.model.database.DataBase
 import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.locationKey
 import com.example.skycast.view.viewmodel.SharedViewModel
 import com.example.skycast.view.viewmodel.ViewModelFactory
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import org.osmdroid.config.Configuration
 import java.io.IOException
 import java.util.Locale
-
+import com.example.skycast.model.sharedprefrence.SharedPrefrenceHelper.Companion.maps
 
 class map : AppCompatActivity() {
     lateinit var binding: ActivityMapBinding
@@ -60,7 +60,8 @@ class map : AppCompatActivity() {
                             sharedPrefFile,
                             MODE_PRIVATE
                         )
-                    ), DataBase.gteInstance(this).getWeatherDao()
+                    ), DataBase.gteInstance(this).getWeatherDao(),
+                    DataBase.gteInstance(this).getAlarmDao()
                 )
             )
         )
@@ -101,7 +102,7 @@ class map : AppCompatActivity() {
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
                 super.onLongPress(e)
-                e?.let {
+                e.let {
                     // Get the coordinates of the long press event
                     val geoPoint: GeoPoint = binding.map.projection.fromPixels(it.x.toInt(), it.y.toInt()) as GeoPoint
                     // Update the marker's position
@@ -172,7 +173,6 @@ class map : AppCompatActivity() {
         bindSheetInfo.setAsHome.setOnClickListener{
             viewModel.saveSelection("LAT_POINT" , geoPoint.latitude.toString())
             viewModel.saveSelection("LONG_POINT" , geoPoint.longitude.toString())
-
             val intent = Intent(this , MainActivity::class.java)
             intent.putExtra("LATITUDE" , geoPoint.latitude)
             intent.putExtra("LONGTIUDE" , geoPoint.longitude)
@@ -181,6 +181,7 @@ class map : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             sheetInfoDialog.cancel()
+            viewModel.saveSelection(locationKey , maps)
             finish()
 
         }

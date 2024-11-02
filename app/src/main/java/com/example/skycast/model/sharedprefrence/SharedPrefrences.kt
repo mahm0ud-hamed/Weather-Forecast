@@ -1,18 +1,17 @@
 package com.example.skycast.model.sharedprefrence
 
 import android.content.SharedPreferences
-import android.util.Log
-import com.example.skycast.data.Result
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 class SharedPrefrenceHelper(val sharedPrefrences: SharedPreferences) : ISharedPrefrenceHelper {
     companion object {
+
         val celsius: String = "metric"
         val kelvin: String = "standard"
         val fahrenheit: String = "imperial"
         val milePerHour = "imperial"
         val meterPerSecond = "metric"
+        val gps = "gps"
+        val maps = "map"
 
         /*language Keys */
         val english: String = "en"
@@ -23,6 +22,7 @@ class SharedPrefrenceHelper(val sharedPrefrences: SharedPreferences) : ISharedPr
          val windSpeedKey = "tempUnit"
          val latitudeKey = "LAT_POINT"
          val longtudeKey = "LONG_POINT"
+         val locationKey = "Location"
     }
 
     override suspend fun saveSelection(key: String, value: String) {
@@ -50,6 +50,10 @@ class SharedPrefrenceHelper(val sharedPrefrences: SharedPreferences) : ISharedPr
         val long = second.toDoubleOrNull() ?: 0.0
         var points = Pair(lat, long)
         return points
+    }
+
+    override suspend fun lodaLocationDetction(): String {
+        return sharedPrefrences.getString(locationKey, gps)?: gps
     }
 
 }
