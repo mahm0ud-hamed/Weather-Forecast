@@ -8,7 +8,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cardTempUnit"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="15dp"
         app:cardBackgroundColor="@color/fillCard"
@@ -30,10 +30,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                tools:text="Name of Location"
                 android:textColor="@color/white"
                 android:textSize="23sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="Name of Location" />
 
             <TextView
                 android:id="@+id/tv_tempunit_value"
@@ -41,9 +41,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                tools:text="36°"
                 android:textColor="@color/white"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                tools:text="36°" />
+
+            <ImageButton
+                android:id="@+id/btnDeletFav"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                app:srcCompat="@drawable/baseline_delete_outline_24" />
 
 
         </LinearLayout>

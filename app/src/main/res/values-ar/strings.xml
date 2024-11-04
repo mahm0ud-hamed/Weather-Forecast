@@ -32,9 +32,7 @@
     <string name="fah_Lable">ف</string>
     <string name="kelvin_Lable">ك</string>
     <string name="search_for_a_place">البحث عن مكان</string>
-
-
-
-
+    <string name="no_Connection">لا يوجد اتصال بالانترنت </string>
+    <string name="Success_add">تم اضافه الموقع الي المفضلة</string>
 
 </resources>

@@ -1,7 +1,10 @@
 package com.example.skycast.view.alarm
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -40,7 +43,7 @@ class Alarm : AppCompatActivity() {
         setContentView(binding.root)
 
         alarmAdapter = AlarmAdapter(arrayListOf()){
-            viewModel.deleteAlarm(it.id)
+            deleteAlarm(it)
             viewModel.getAllAlarms()
 
         }
@@ -148,13 +151,19 @@ class Alarm : AppCompatActivity() {
         val currentTime = System.currentTimeMillis()
         alarms.forEach { alarm ->
             if (alarm.triggerAtMillis > currentTime) {
-                AlarmManagerHelper.setAlarm(this, alarm.triggerAtMillis, alarm.weatherInfo)
+                AlarmManagerHelper.setAlarm(this, alarm.triggerAtMillis, alarm.weatherInfo, alarm.id.toInt())
             }
         }
     }
 
 
-
-
+    private fun deleteAlarm(alarm: WeatherAlarm){
+        viewModel.deleteAlarm(alarm.id)
+        AlarmManagerHelper.cancelAlarm(this , alarm.id.toInt())
+        viewModel.getAllAlarms()
+    }
 
 }
+
+
+

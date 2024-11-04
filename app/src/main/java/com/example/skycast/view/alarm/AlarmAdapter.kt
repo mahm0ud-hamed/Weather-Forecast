@@ -18,6 +18,7 @@ class AlarmAdapter(var alarmList : List<WeatherAlarm>, private var onCardClick: 
 
     fun updateList(newList : List<WeatherAlarm>){
         this.alarmList = newList
+        notifyDataSetChanged()
     }
     class ViewHolder(val binding: ItemAlarmBinding) : RecyclerView.ViewHolder(binding.root)
 

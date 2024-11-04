@@ -10,18 +10,22 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility
 import com.example.skycast.Util.LocaleUtils
 import com.example.skycast.Util.convertDateToHmanRedable
 import com.example.skycast.Util.dayOneEnd
 import com.example.skycast.Util.dayOneStart
 import com.example.skycast.Util.getTimeAsHumanRedable
+import com.example.skycast.Util.isNetworkAvailable
 import com.example.skycast.Util.setWeatherStateImage
 import com.example.skycast.data.Result
 import com.example.skycast.databinding.ActivityMainBinding
@@ -83,16 +87,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        checkLanguage()
-        colloectInfoFromIntent()
-        loadLocationDetection()
-        /*handeling open of Home form the application launcher */
-        viewModel.getSavedLatLongPointOfLocation()
-        setHome()
-        setViewrPage()
-        getTodayWeatherState()
-        getFiveDaysWeatherSate()
-        setUnitsAndLables()
+            checkLanguage()
+            colloectInfoFromIntent()
+            loadLocationDetection()
+            viewModel.getSavedLatLongPointOfLocation()
+            setHome()
+            setViewrPage()
+            getTodayWeatherState()
+            getFiveDaysWeatherSate()
+            setUnitsAndLables()
+
         if (!isLocationPermissionEnabled()) {
             ActivityCompat.requestPermissions(
                 this, arrayOf(
@@ -135,8 +139,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         setAdapter()
-        setFiveDaysStetonUI()
-       setCurrentStateOnUI()
+        //setFiveDaysStetonUI()
+         //setCurrentStateOnUI()
         buttonsListners()
     }
 
@@ -180,8 +184,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        Log.i("location" , locationDetection)
     }
+    @SuppressLint("MissingPermission")
+    private fun startLocationUpdate() {
+
+            fusedClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedClient.requestLocationUpdates(
+                LocationRequest.Builder(5000)
+                    .apply { Priority.PRIORITY_HIGH_ACCURACY }.build(),
+                object : LocationCallback() {
+                    override fun onLocationResult(location: LocationResult) {
+                        super.onLocationResult(location)
+                        lonPoint = location.lastLocation?.latitude!!.toDouble()
+                        latPoint = location.lastLocation?.longitude!!.toDouble()
+                        /*request five days forecast*/
+                        getFiveDaysWeatherSate()
+                        /*request the current weather data */
+                        getTodayWeatherState()
+                    }
+                }, Looper.getMainLooper()
+            )
+    }
+
     /*check if location is enabled or not */
     private fun isLocationEnabled(): Boolean {
         val locationManager: LocationManager =
@@ -204,25 +228,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    @SuppressLint("MissingPermission")
-    private fun startLocationUpdate() {
-        fusedClient = LocationServices.getFusedLocationProviderClient(this)
-        fusedClient.requestLocationUpdates(
-            LocationRequest.Builder(5000)
-                .apply { Priority.PRIORITY_HIGH_ACCURACY }.build(),
-            object : LocationCallback() {
-                override fun onLocationResult(location: LocationResult) {
-                    super.onLocationResult(location)
-                    lonPoint = location.lastLocation?.latitude!!.toDouble()
-                    latPoint = location.lastLocation?.longitude!!.toDouble()
-                    /*request five days forecast*/
-                    getFiveDaysWeatherSate()
-                    /*request the current weather data */
-                    getTodayWeatherState()
-                }
-            }, Looper.getMainLooper()
-        )
-    }
     /*wait for edit to select the degree descriptor */
     fun setCurrentTemperature(info: CurrentWeather, tvCurrentDegree: TextView) {
 
@@ -308,20 +313,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setHome() {
-
-        if (!isFromFav && (locationDetection == maps)) {
-            loadLatituedAndLongtiude()
-            Log.i("hello" , "hello from maps")
+        if (!isFromFav && (locationDetection == maps) && !isViewOnly) {
+            if(isNetworkAvailable(this)){
+                loadLatituedAndLongtiude()
+                updateCurrentStateOnUI()
+                updateFiveDaysStateonUI()
+            }
+            else {
+                noInternetHomeView()
+            }
 
         }
-        else if(!isFromFav && (locationDetection == gps)){
-            startLocationUpdate()
-            Log.i("hello" , "hello from gps")
+        else if(!isFromFav && (locationDetection == gps) &&!isViewOnly){
+            if(isNetworkAvailable(this)){
+                startLocationUpdate()
+                updateCurrentStateOnUI()
+                updateFiveDaysStateonUI()
+            }
+            else{
+                noInternetHomeView()
+            }
 
         }
-        else if(isFromFav){
+        else if(isFromFav && !isViewOnly){
             loadLocationFromDataBase()
-            Log.i("hello" , "hello")
+        }
+        else if(isViewOnly){
+            setViewrPage()
+            getTodayWeatherState()
+            getFiveDaysWeatherSate()
+            updateCurrentStateOnUI()
+            updateFiveDaysStateonUI()
         }
     }
 
@@ -353,7 +375,6 @@ class MainActivity : AppCompatActivity() {
         isHome= intent.getBooleanExtra("ToHome" , false)
         isFromFav = intent.getBooleanExtra("fromFav", false)
         cityName = intent.getStringExtra("cityName").toString()
-        Log.i("cityName" , cityName)
 
     }
 
@@ -367,21 +388,24 @@ class MainActivity : AppCompatActivity() {
         LocaleUtils.setLocale(this,language)
     }
     private fun getTodayWeatherState() {
-        viewModel.getCurrentWeatherState(
-            lat = latPoint,
-            lon = lonPoint,
-            lan = language,
-            unit = tempetatureUnit
-        )
+
+            viewModel.getCurrentWeatherState(
+                lat = latPoint,
+                lon = lonPoint,
+                lan = language,
+                unit = tempetatureUnit
+            )
     }
 
     private fun getFiveDaysWeatherSate(){
-        viewModel.getFiveDaysForeCast(
-            lat = latPoint,
-            lon = lonPoint,
-            lan = language,
-            unit = tempetatureUnit
-        )
+        if(isNetworkAvailable(this)){
+            viewModel.getFiveDaysForeCast(
+                lat = latPoint,
+                lon = lonPoint,
+                lan = language,
+                unit = tempetatureUnit
+            )
+        }
     }
 
     private fun setUnitsAndLables(){
@@ -411,7 +435,7 @@ class MainActivity : AppCompatActivity() {
             else -> {"m/s"}
         }
     }
-    private fun setCurrentStateOnUI(){
+    private fun updateCurrentStateOnUI(){
         lifecycleScope.launch {
             viewModel.currentWeatherState.collect {
                 when (it) {
@@ -426,7 +450,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun setFiveDaysStetonUI(){
+    private fun updateFiveDaysStateonUI(){
         lifecycleScope.launch {
             viewModel.fiveDaysForeCast.collect {
                 when (it) {
@@ -467,8 +491,13 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         binding.btnAddFavLocation.setOnClickListener{
-            val intent = Intent(this , map::class.java)
-            startActivity(intent)
+            if(isNetworkAvailable(this)){
+                val intent = Intent(this , map::class.java)
+                startActivity(intent)
+            }else{
+                Toast.makeText(this , getString(R.string.no_Connection) ,Toast.LENGTH_SHORT).show()
+            }
+
         }
 
         binding.btnFavourite.setOnClickListener {
@@ -496,10 +525,27 @@ class MainActivity : AppCompatActivity() {
                 fiveDaysForeCast.list
             )
             viewModel.saveLocation(weatherEntity)
+
+            Toast.makeText(this, getString(R.string.Success_add), Toast.LENGTH_SHORT).show()
+
         }
     }
-}
 
+    private fun noInternetHomeView(){
+        binding.cvFiveDayForecast.visibility= View.GONE
+        binding.cvOnedayForeCast.visibility = View.GONE
+        binding.cvFiveDayForecast.visibility = View.GONE
+        binding.lnvOneDayLbale.visibility= View.GONE
+        binding.lnvFiveDayLable.visibility= View.GONE
+        binding.cvCurrentDetails.visibility= View.GONE
+
+        binding.tvCurrentTemp.visibility = View.GONE
+        binding.tvSkyState.visibility= View.GONE
+        binding.imgvNoConnection.visibility = View.VISIBLE
+        binding.imgvNoConnection.setImageResource(R.drawable.noconnection)
+
+    }
+}
 
 /*method too check the minimum and mximum temperature per day , return Pair of int with m,min and max value */
 fun getMaxAndMinTemperaturePerDay(dayInfo: kotlin.collections.List<List>): Pair<Int, Int> {

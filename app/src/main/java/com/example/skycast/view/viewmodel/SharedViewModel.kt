@@ -1,5 +1,10 @@
 package com.example.skycast.view.viewmodel
 
+import android.app.AlarmManager
+import android.app.Application
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat.WearableExtender
 import androidx.lifecycle.ViewModel
@@ -74,6 +79,7 @@ class SharedViewModel(val repository: IRepository):ViewModel(){
     fun deleteAlarm(id :Long){
         viewModelScope.launch {
             repository.deleteAlams(id)
+            getAllAlarms()
         }
     }
 
@@ -96,12 +102,14 @@ class SharedViewModel(val repository: IRepository):ViewModel(){
     fun saveLocation(weatherEntity: WeatherEntity){
         viewModelScope.launch {
             repository.saveLocation(weatherEntity)
+            getAllSavedLocations()
         }
     }
 
     fun deleteSavedLcoation(weatherEntity: WeatherEntity){
         viewModelScope.launch {
             repository.deleteLocation(weatherEntity)
+            getAllSavedLocations()
         }
     }
 
@@ -169,6 +177,7 @@ class SharedViewModel(val repository: IRepository):ViewModel(){
             repository.saveSelection(key, value)
         }
     }
+
 
 
 }

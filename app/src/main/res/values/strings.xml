@@ -47,4 +47,6 @@
     <string name="location">Location</string>
     <string name="gps">GPS</string>
     <string name="map">Map</string>
+    <string name="no_Connection">No Internet Connection</string>
+    <string name="Success_add">Saved Successfully </string>
 </resources>
